@@ -32,7 +32,7 @@ $ npm run start:prod
 
 ## Installation and Setup
 #### 1. Prometheus Server
-- Create a `prometheus-config.yml` file and copy the following configration. Don't forget to replace `<NDOEJS_SERVER_ADDRESS>` with actual value.
+- Create a `prometheus-config.yml` file and copy the following configration. Don't forget to replace `<NDOEJS_SERVER_ADDRESS>` with actual value and Port.
 ```yml
 global:
   scrape_interval: 4s
