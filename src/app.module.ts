@@ -3,12 +3,15 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { LoggingInterceptor } from './logging/logging.interceptor';
+import { LoggerService } from './logger.service';
+import { MetricsModule } from './metrics/metrics.module';
 
 @Module({
-  imports: [],
+  imports: [MetricsModule],
   controllers: [AppController],
   providers: [
     AppService,
+    LoggerService,
     {
       provide: APP_INTERCEPTOR,
       scope: Scope.REQUEST,

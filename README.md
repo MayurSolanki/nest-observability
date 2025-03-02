@@ -42,8 +42,9 @@ scrape_configs:
     static_configs:
       - targets: ["<NDOEJS_SERVER_ADDRESS>"]
 ```
-- Start the Prometheus Server using docker compose
-```yml
+- create docker-compose.yml file
+- Start the Prometheus Server using docker compose up command 
+```
 version: "3"
 
 services:
@@ -52,7 +53,7 @@ services:
     ports:
       - 9090:9090
     volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./prometheus-config.yml:/etc/prometheus/prometheus.yml
 ```
 Great, The prometheus server is now up and running at PORT 9090
 
@@ -63,8 +64,10 @@ docker run -d -p 3000:3000 --name=grafana grafana/grafana-oss
 ![grafana](https://grafana.com/static/img/grafana/showcase_visualize.jpg)
 
 ### 3. Setup Loki Server
+- npm i winston winston-loki
 ```bash
 docker run -d --name=loki -p 3100:3100 grafana/loki
 ```
 
+- in tsconfig file, add  "moduleResolution": "node", "esModuleInterop": true
 

@@ -1,57 +1,74 @@
 import {
-  CallHandler,
-  ExecutionContext,
   Injectable,
-  Logger,
   NestInterceptor,
+  ExecutionContext,
+  CallHandler,
+  HttpStatus,
 } from '@nestjs/common';
-import { Observable, tap } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
+import { tap, catchError } from 'rxjs/operators';
+import { LoggerService } from 'src/logger.service';
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class LoggingInterceptor implements NestInterceptor {
-  private readonly logger = new Logger(LoggingInterceptor.name);
+  constructor(private readonly loggerService: LoggerService) {}
 
-  //  constructor(private readonly requestService: RequestService) {}
+  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+    const request = context.switchToHttp().getRequest();
+    const response = context.switchToHttp().getResponse();
+    const { ip, method, url, body } = request;
+    const correlationId = uuidv4();
+    request.correlationId = correlationId;
 
-  intercept(
-    context: ExecutionContext,
-    next: CallHandler<any>,
-  ): Observable<any> | Promise<Observable<any>> {
-    const request = context.switchToHttp().getRequest(); //access to the request object
-    const userAgent = request.get('user-agent') || ''; // user agent
-    const { method, url, body, headers, ip } = request; // ip, method and url from the request.
-
-    // get information from the request
-    this.logger.log(
-      `${method} ${url} ${userAgent} ${ip} }: ${context.getClass().name} ${
-        context.getHandler().name
-      } invoked...`,
+    // Log the incoming request
+    this.loggerService.info(
+      `Incoming request: ${method} ${url} ${correlationId}`,
+      {
+        request: {
+          body,
+          ip,
+        },
+      },
     );
 
-    this.logger.log(`${JSON.stringify(body)}  Request Body`);
-    this.logger.log(`${headers}  Request headers`);
+    const now = Date.now();
 
-    const now = Date.now(); // get current time
-
-    // get information from response
     return next.handle().pipe(
-      tap({
-        next: (responseBody: any): void => {
-          const response = context.switchToHttp().getResponse();
-          const { statusCode } = response;
-          const contentLength = response.get('content-length');
+      tap((responseBody) => {
+        const duration = Date.now() - now;
 
-          this.logger.log(
-            `${method} ${url} ${statusCode} ${contentLength} - ${userAgent} ${ip} : ${
-              Date.now() - now
-            }ms  Response Interceptor`,
-          );
+        // Log the response details
+        this.loggerService.info(
+          `Response sent: ${method} ${url} ${correlationId} ${response.statusCode}`,
+          {
+            response: {
+              body: responseBody,
+              statusCode: response.statusCode,
+              duration,
+            },
+          },
+        );
+      }),
+      catchError((error) => {
+        const duration = Date.now() - now;
+        const statusCode = error?.status || HttpStatus.INTERNAL_SERVER_ERROR;
 
-          this.logger.log('Response: ', JSON.stringify(responseBody));
-        },
-        error: (err: Error): void => {
-          this.logger.error(err, 'Response Error Interceptor');
-        },
+        // Log the error response details
+        this.loggerService.error(
+          `Error occurred: ${method} ${url} ${correlationId} ${statusCode}`,
+          {
+            response: {
+              message: error.message,
+              stack: error.stack,
+              statusCode,
+            },
+            duration,
+          },
+        );
+
+        // Re-throw the error to ensure it reaches the global error handler
+        return throwError(() => error);
       }),
     );
   }

@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Post } from '@nestjs/common';
-import { AppService } from './app.service';
 import { User } from './app.models';
+import { AppService } from './app.service';
 
 @Controller('user')
 export class AppController {
@@ -11,7 +11,7 @@ export class AppController {
     return this.appService.getUserData();
   }
 
-  @Post()
+  @Post('')
   createUser(@Body() user: User): any {
     return this.appService.createUserData(user);
   }
