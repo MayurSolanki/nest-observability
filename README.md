@@ -24,17 +24,13 @@ $ npm run start:prod
 ```
 
 
-```
-
 # Monitoring with Grafana, Loki and Prometheus
 
-Video Tutorial: [https://youtu.be/ddZjhv66o_o](https://youtu.be/ddZjhv66o_o)
+## Prerequisite
+- Basic Knowlege of Node.js and NestJS
+- Basic to Intermediate knowledge in Docker and Containerization 
 
-### Prerequisite
-- Basic Knowlege of Node.js and Express Framework
-- Basic to Intermediate knowledge in Docker and Containerization - [Learn Docker Containerization](https://learn.piyushgarg.dev/learn/docker)
-
-### Installation and Setup
+## Installation and Setup
 #### 1. Prometheus Server
 - Create a `prometheus-config.yml` file and copy the following configration. Don't forget to replace `<NDOEJS_SERVER_ADDRESS>` with actual value.
 ```yml
